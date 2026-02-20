@@ -1,76 +1,88 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
+#include <Firebase_ESP_Client.h>
 
-// ======= إعدادات WiFi =======
-const char* ssid = "اسم الشبكة بتاعتك";
-const char* password = "كلمة السر";
+/* 1. Define the WiFi credentials */
+#define WIFI_SSID "Your_SSID"
+#define WIFI_PASSWORD "YOUR_PASSWORD"
 
-// ======= إعدادات OpenAI =======
-const char* openai_api_key = "حط هنا مفتاح OpenAI بتاعك";
-const char* openai_endpoint = "https://api.openai.com/v1/chat/completions";
+/* 2. Define the API Key */
+#define API_KEY "YOUR_API_KEY"
 
-// ======= إعداد ESP32 =======
-String userMessage = "";
+/* 3. Define the RTDB URL */
+#define DATABASE_URL "YOUR_RTDB_URL" 
 
-void setup() {
+/* 4. Define the user Email and password that alreadey registerd or added in your project */
+#define USER_EMAIL "user_email"
+#define USER_PASSWORD "user_password"
+
+// Define Firebase Data object
+FirebaseData fbdo;
+
+FirebaseAuth auth;
+FirebaseConfig config;
+
+unsigned long sendDataPrevMillis = 0;
+
+const int ledPin = 4;
+
+void setup()
+{
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+
   Serial.begin(115200);
-  delay(1000);
-  
-  Serial.println("Connecting to WiFi...");
-  WiFi.begin(ssid, password);
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED)
+  {
     Serial.print(".");
+    delay(300);
   }
-  
-  Serial.println("");
-  Serial.println("WiFi connected!");
-  Serial.println("Type your message and press enter:");
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
+
+  /* Assign the api key (required) */
+  config.api_key = API_KEY;
+
+  /* Assign the user sign in credentials */
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+
+  /* Assign the RTDB URL (required) */
+  config.database_url = DATABASE_URL;
+
+  // Comment or pass false value when WiFi reconnection will control by your code or third party library e.g. WiFiManager
+  Firebase.reconnectNetwork(true);
+
+  // Since v4.4.x, BearSSL engine was used, the SSL buffer need to be set.
+  // Large data transmission may require larger RX buffer, otherwise connection issue or data read time out can be occurred.
+  fbdo.setBSSLBufferSize(4096 /* Rx buffer size in bytes from 512 - 16384 */, 1024 /* Tx buffer size in bytes from 512 - 16384 */);
+
+  // Limit the size of response payload to be collected in FirebaseData
+  fbdo.setResponseSize(2048);
+
+  Firebase.begin(&config, &auth);
+
+  Firebase.setDoubleDigits(5);
+
+  config.timeout.serverResponse = 10 * 1000;
 }
 
-void loop() {
-  if (Serial.available()) {
-    userMessage = Serial.readStringUntil('\n');
-    userMessage.trim();
-    
-    if(userMessage.length() > 0){
-      sendToChatGPT(userMessage);
-    }
-  }
-}
+void loop()
+{
+  // Firebase.ready() should be called repeatedly to handle authentication tasks.
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > 1000 || sendDataPrevMillis == 0))
+  {
+    sendDataPrevMillis = millis();
 
-void sendToChatGPT(String prompt){
-  if(WiFi.status() == WL_CONNECTED){
-    HTTPClient http;
-    http.begin(openai_endpoint);
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("Authorization", "Bearer " + String(openai_api_key));
-    
-    // JSON للجسم المرسل
-    String requestBody = "{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"user\", \"content\": \"" + prompt + "\"}]}";
-    
-    int httpResponseCode = http.POST(requestBody);
-    
-    if(httpResponseCode > 0){
-      String response = http.getString();
-      
-      // استخراج الرد من JSON
-      DynamicJsonDocument doc(4096);
-      deserializeJson(doc, response);
-      String botReply = doc["choices"][0]["message"]["content"];
-      
-      Serial.println("\nChatGPT:");
-      Serial.println(botReply);
-      Serial.println("\nاكتب رسالتك:");
-    } else {
-      Serial.print("Error on HTTP request: ");
-      Serial.println(httpResponseCode);
-    }
-    
-    http.end();
-  } else {
-    Serial.println("WiFi Disconnected!");
+  int ledState;
+   if(Firebase.RTDB.getInt(&fbdo, "/led/state", &ledState)){
+    digitalWrite(ledPin, ledState);
+   }else{
+    Serial.println(fbdo.errorReason().c_str());
+   }
   }
 }
