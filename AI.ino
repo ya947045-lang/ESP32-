@@ -3,10 +3,9 @@
 #include <ArduinoJson.h>
 #include <WebServer.h>
 
-const char* ssid = "WE_C5A7E7";
-const char* password = "k8221770
-";
-const char* apiKey = "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";
+const char* ssid = "NAME";//هنا حط اسم الراوتار
+const char* password = "PASSWORD";//هنا كط الباسوورد
+const char* apiKey = "API Key";هنا حط المفتاح
 
 WebServer server(80);
 
@@ -316,3 +315,4 @@ void setup() {
 void loop() {
   server.handleClient();
 }
+
