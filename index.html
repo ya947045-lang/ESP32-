@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Future Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body class="bg-[#05070d] text-white font-[Tajawal]">
+
+<!-- زر واتساب -->
+<a href="https://wa.me/201XXXXXXXXXX" target="_blank" class="fixed bottom-8 left-8 w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl z-50 hover:scale-110 transition">
+<svg class="w-8 h-8 fill-white" viewBox="0 0 24 24"><path d="M20.52 3.46A11.9 11.9 0 0 0 12.25 11.88 11.88 0 0 0 2.9 20.64L1 24l3.47-.9A11.9 11.9 0 0 0 12 23.75a11.88 11.88 0 0 0 8.52-20.29z"/></svg>
+</a>
+
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <h1 class="text-6xl font-black text-center mb-12 bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] bg-clip-text text-transparent">Future Maker</h1>
+
+  <div id="projects-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+</section>
+
+<script>AOS.init();</script>
+<script>
+// هنا تحط كل مشاريعك
+const projects = [
+  {
+    id: "steering-wheel",
+    title: "دركسيون ESP32-S2 USB",
+    desc: "دركسيون ألعاب كامل بـ Joystick + ويب سيرفر + حساسية 2900 للبنزين",
+    youtube: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    image: "https://via.placeholder.com/600x400/0c0f1a/00d4ff?text=Steering+Wheel",
+    downloads: [
+      {board: "ESP32-S2 DevKit", file: "#"},
+      {board: "ESP32-S3 DevKit", file: "#"}
+    ]
+  }
+];
+
+// نعرض المشاريع
+const grid = document.getElementById('projects-grid');
+grid.innerHTML = projects.map(p => `
+  <div class="bg-[#0c0f1a] rounded-3xl overflow-hidden border-gray-800 hover:border-[#00d4ff] transition" data-aos="fade-up">
+    <img src="${p.image}" class="w-full h-56 object-cover">
+    <div class="p-6">
+      <h3 class="text-2xl font-bold mb-3 bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] bg-clip-text text-transparent">${p.title}</h3>
+      <p class="text-gray-400 mb-5">${p.desc}</p>
+      <button onclick="openProject('${p.id}')" class="w-full py-3 bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] rounded-xl font-bold hover:opacity-90 transition">عرض التفاصيل</button>
+    </div>
+  </div>
+`).join('');
+
+// نفتح صفحة المشروع
+function openProject(id) {
+  localStorage.setItem('currentProject', JSON.stringify(projects.find(p=>p.id==id)));
+  window.location.href = 'project.html';
+}
+</script>
+</body>
+</html>
