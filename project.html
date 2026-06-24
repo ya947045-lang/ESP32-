@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Future Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#05070d] text-white font-[Tajawal] min-h-screen">
+
+<nav class="bg-[#0c0f1a] px-6 py-4 border-b border-gray-800">
+  <a href="index.html" class="text-[#00d4ff] font-bold text-xl">← الرجوع للمشاريع</a>
+</nav>
+
+<div id="content" class="max-w-5xl mx-auto px-6 py-12"></div>
+
+<a href="https://wa.me/201XXXXXXXXXX" target="_blank" class="fixed bottom-8 left-8 w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl z-50">
+<svg class="w-8 h-8 fill-white" viewBox="0 0 24 24"><path d="M20.52 3.46A11.9 11.9 0 0 0 12.25"/></svg>
+</a>
+
+<script>
+const p = JSON.parse(localStorage.getItem('currentProject'));
+
+if(!p) {
+  document.getElementById('content').innerHTML = '<p class="text-center text-red-500">المشروع مش موجود. ارجع للصفحة الرئيسية</p>';
+} else {
+  document.getElementById('content').innerHTML = `
+    <h1 class="text-5xl font-black mb-6 bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] bg-clip-text text-transparent">${p.title}</h1>
+    <iframe src="${p.youtube}" class="w-full h-[500px] rounded-2xl mb-8" allowfullscreen></iframe>
+    <p class="text-lg text-gray-300 leading-relaxed mb-10">${p.desc}</p>
+
+    <h2 class="text-3xl font-black mb-6 text-[#00d4ff]">تحميل الكود</h2>
+    <div class="space-y-4">
+      ${p.downloads.map(d=>`
+        <a href="${d.file}" target="_blank" class="flex items-center justify-between w-full p-5 bg-[#0c0f1a] rounded-2xl border-gray-800 hover:border-[#00d4ff] transition">
+          <span class="text-lg font-bold">${d.board}</span>
+          <span class="px-4 py-2 bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] rounded-lg">تحميل</span>
+        </a>
+      `).join('')}
+    </div>
+  `;
+  document.title = p.title + ' - Future Maker';
+}
+</script>
+</body>
+</html>
